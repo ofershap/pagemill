@@ -42,7 +42,7 @@ func resolveVersion(ctx context.Context, channel string) (version, url string, e
 	if err != nil {
 		return "", "", fmt.Errorf("pagemill: fetch chrome-for-testing versions: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return "", "", fmt.Errorf("pagemill: chrome-for-testing endpoint returned %s", resp.Status)
 	}
@@ -108,7 +108,7 @@ func browserPath(ctx context.Context, cacheDir, version, url string) (string, er
 	if err := download(ctx, url, zipPath); err != nil {
 		return "", err
 	}
-	defer os.Remove(zipPath)
+	defer func() { _ = os.Remove(zipPath) }()
 	if err := extractHeadlessShell(zipPath, dir); err != nil {
 		return "", err
 	}
@@ -134,7 +134,7 @@ func download(ctx context.Context, url, dest string) error {
 	if err != nil {
 		return fmt.Errorf("pagemill: download browser: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("pagemill: browser download returned %s", resp.Status)
 	}
@@ -142,7 +142,7 @@ func download(ctx context.Context, url, dest string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	_, err = io.Copy(f, resp.Body)
 	return err
 }
@@ -157,7 +157,7 @@ func extractHeadlessShell(zipPath, dir string) error {
 	if err != nil {
 		return fmt.Errorf("pagemill: open browser archive: %w", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 	for _, f := range r.File {
 		name := f.Name
 		// Strip the top-level platform directory.
@@ -191,12 +191,12 @@ func extractHeadlessShell(zipPath, dir string) error {
 		}
 		w, err := os.OpenFile(out, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
 		if err != nil {
-			rc.Close()
+			_ = rc.Close()
 			return err
 		}
 		_, copyErr := io.Copy(w, rc)
 		closeErr := w.Close()
-		rc.Close()
+		_ = rc.Close()
 		if copyErr != nil {
 			return copyErr
 		}
