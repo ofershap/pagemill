@@ -1,0 +1,16 @@
+# pagemill
+
+> HTML to PDF/PNG from Go in one call. Downloads and manages a pinned
+> chrome-headless-shell itself: no Node, no separate service (Gotenberg),
+> no hand-rolled chromedp allocator flags, no archived wkhtmltopdf.
+
+## Usage
+
+- pdf, err := pagemill.HTML(html) renders an HTML string to PDF (A4, 0.4in margins).
+- pagemill.PNG(html) renders a full-page PNG; Options cover paper size, margins, landscape, render timeout, pinned browser version and a custom browser path.
+- First run fetches a pinned chrome-headless-shell from the official Chrome for Testing endpoints (version + SHA256 pinned); later runs reuse it.
+- Stdlib-first Go API; container notes in the README for Docker/Alpine deployments.
+
+## Docs
+
+- [README](https://github.com/ofershap/pagemill#readme): install, options, real resource costs, containers
